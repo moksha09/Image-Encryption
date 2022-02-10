@@ -33,6 +33,7 @@ xnn=zeros(1,m*n);
 yn=zeros(1,m*n);
 ynn=zeros(1,m*n);
 zn=zeros(1,m*n);
+
 znn=zeros(1,m*n);
 % Give an initial value for 3-D logistic equations
 xn(1)= 0.235; p=3.77;
@@ -82,3 +83,45 @@ t=N*N*N-size(Xrgb,2); % Size of remaining no. of elements required to fill the c
 Ran = randi([0,255],1,t); % Creating random numbers for rest of the cude
 Xrgb = [Xrgb Ran]; %Adding the random numbers at the end of the single sequence
 Cube1=permute(reshape(Xrgb,N,N,N),[1,2,3]); % Forming the Cube
+
+%Confusion
+t = 10; % Number of iterations
+AB = randi([1,N],1,6); % Assigning a,b secret keys to random integers
+ax=AB(1);ay=AB(2); az=AB(3); bx=AB(4); by=AB(5); bz=AB(6);
+% Making marix A
+A11 = (ax*az*by)+1; A12 = az; A13 = ay+(ax*az)+(ax*ay*az*by);
+A21 = bz+(ax*by)+(ax*az*by*bz); A22 = (az*bz)+1; A23 = (ay*az)+(ax*ay*az*by*bz)+(ax*az*bz)+(ax*ay*by)+ax;
+A31 = (ax*bx*by)+by; A32 = bx; A33 = (ax*ay*bx*by)+(ax*bx)+(ay*by)+1;
+A = [A11 A12 A13; A21 A22 A23; A31 A32 A33];
+%Iterating through CAT map
+Cube2 = zeros(N,N,N);
+    for k = 1:N
+        for i = 1:N         % loop through all the pixels
+            for j = 1:N
+                newj = mod((A*[i;j;k]),N);    
+                newj=reshape(newj,[1,3]);
+                newj=1.+newj; %since matlab doesn't take 0 index
+                Cube2(newj(1),newj(2),newj(3)) = Cube1(i,j,k);
+            end  
+        end
+    end
+M = ceil(((N*N*N)/3)^(1/2))
+
+T=(M*M*3)-(N*N*N); % Size of remaining no. of elements required to fill the cube
+Ran = randi([0,255],1,T);
+Cube3 = flipud(Cube2);
+Cube3 = reshape(Cube3,1,[]);
+Cube3 = [ Cube3 Ran ];
+Cuboid1 = flipud(reshape(Cube3,M,M,3));
+
+MatR = Cuboid1(:,:,1);
+MatR = uint8(MatR);
+MatG = Cuboid1(:,:,2);
+MatG = uint8(MatG);
+MatB = Cuboid1(:,:,3);
+MatB = uint8(MatB);
+Cipher = cat(3,MatR,MatG,MatB);
+%X = uint8(X);   % this may have to be adjusted depending on the type of image
+figure(2)
+imshow(Cipher)
+title("Encrypted Image")
