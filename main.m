@@ -1,4 +1,4 @@
-% read the image
+%read the image
 I = imread('lenna.png');
 figure(1)
 imshow(I)
@@ -169,7 +169,37 @@ imshow(Decrypted)
 title("Decrypted Image")   
 
 % Key Sensitivity
+ X=imread('encrypted1.png');
+ Y=imread('encrypted2.png');
+ Z =imsubtract(X,Y);
+ figure(8)
+ subplot(1,3,1)
+ imshow(X)
+ title('Encrypted image');
+ subplot(1,3,2)
+ imshow(Y)
+ title('Encrypted image1bit');
+ subplot(1,3,3)
+ imshow(Z)
+ title('Difference');
+ %differentail attack
+ c1=imread('1.png');
+c2=imread('1pix.png');
+NPCR_UACI(c1,c2);
+%Chosen attack
+I1=imread('lenna.png');
+I2=imread('baboon.png');
 
+I3=bitxor(I1,I2);
+
+E1=imread('encrypted1.png');
+E2=imread('baboonencr.png');
+
+E3=bitxor(E1,E2);
+
+figure,imshow(I3);
+
+figure,imshow(E3);
 
 % Histogram Analysis
 figure(4)
@@ -315,13 +345,14 @@ function [npcr, uaci] = NPCR_UACI(ChiperImg,ChiperImg1bit)
             end
         end
     end
-    npcr = d / (M * N);
+    disp('NCPR in percentage')
+    npcr = (d / (M * N))*100
 
     %% UACI
     c = 0.000000;
     for i = 1 : M * N
          c = c + abs( double( f1(i)) - double( f2(i)));
     end
-    uaci = c / (255 * M * N);
+    disp('UACI in percentage')
+    uaci = (c / (255 * M * N))
 end
-
